@@ -30,3 +30,15 @@ echo 0 > /sys/class/vtconsole/vtcon1/bind
 
 # Avoid a Race condition by waiting x seconds.
 sleep 7
+
+# Unload Radeon GPU driver
+modprobe -r amdgpu
+
+# Unbind the GPU from display driver
+virsh nodedev-detach pci_0000_0a_00_0
+virsh nodedev-detach pci_0000_0a_00_1
+
+# Load VFIO Kernel Module  
+modprobe vfio
+modprobe vfio_pci
+modprobe vfio_iommu_type1
