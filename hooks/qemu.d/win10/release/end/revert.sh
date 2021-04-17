@@ -13,3 +13,12 @@ virsh nodedev-reattach pci_0000_0a_00_0
 # Rebind VT consoles
 echo 1 > /sys/class/vtconsole/vtcon0/bind
 echo 1 > /sys/class/vtconsole/vtcon1/bind
+
+# Load all Radeon drivers
+modprobe amdgpu
+modprobe gpu_sched
+modprobe ttm
+modprobe drm_kms_helper
+modprobe i2c_algo_bit
+modprobe drm
+modprobe snd_hda_intel
