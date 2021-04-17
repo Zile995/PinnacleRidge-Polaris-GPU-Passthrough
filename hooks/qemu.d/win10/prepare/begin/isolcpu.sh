@@ -61,3 +61,17 @@ set_affinity() {
     done
 }
 
+if [[ "$VM_ACTION" == "prepare/begin" ]]; then
+    set_host_cores
+    echo $(date) Successfully reserved CPUs $HOST_CORES for host machine >> $LOG
+
+elif [[ "$VM_ACTION" == "started/begin" ]]; then
+    set_virt_cores
+    echo $(date) Successfully reserved CPUs $VIRT_CORES for VM $VM_NAME >> $LOG    
+    set_sched_policy
+    set_affinity
+
+elif [[ "$VM_ACTION" == "release/end" ]]; then
+    release_cores
+    echo $(date) Successfully released CPUs $VIRT_CORES >> $LOG
+fi
