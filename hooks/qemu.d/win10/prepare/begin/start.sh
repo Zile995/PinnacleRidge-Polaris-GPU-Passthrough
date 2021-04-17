@@ -19,3 +19,7 @@ fi
 sysctl net.ipv4.ip_forward=1
 sysctl net.ipv6.conf.default.forwarding=1
 sysctl net.ipv6.conf.all.forwarding=1
+
+# Stop display manager, fan control service
+systemctl stop sddm.service
+systemctl stop amdgpu-fancontrol.service
