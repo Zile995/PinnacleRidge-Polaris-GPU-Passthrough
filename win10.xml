@@ -8,7 +8,32 @@
   </metadata>
   <memory unit="KiB">4194304</memory>
   <currentMemory unit="KiB">4194304</currentMemory>
-  <vcpu placement="static">2</vcpu>
+  <vcpu placement='static' current='8'>12</vcpu>
+  <vcpus>
+    <vcpu id='0' enabled='yes' hotpluggable='no'/>
+    <vcpu id='1' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='2' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='3' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='4' enabled='no' hotpluggable='yes'/>
+    <vcpu id='5' enabled='no' hotpluggable='yes'/>
+    <vcpu id='6' enabled='no' hotpluggable='yes'/>
+    <vcpu id='7' enabled='no' hotpluggable='yes'/>
+    <vcpu id='8' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='9' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='10' enabled='yes' hotpluggable='yes'/>
+    <vcpu id='11' enabled='yes' hotpluggable='yes'/>
+  </vcpus>
+  <cputune>
+    <vcpupin vcpu='0' cpuset='1'/>
+    <vcpupin vcpu='1' cpuset='7'/>
+    <vcpupin vcpu='2' cpuset='2'/>
+    <vcpupin vcpu='3' cpuset='8'/>
+    <vcpupin vcpu='8' cpuset='4'/>
+    <vcpupin vcpu='9' cpuset='10'/>
+    <vcpupin vcpu='10' cpuset='5'/>
+    <vcpupin vcpu='11' cpuset='11'/>
+    <emulatorpin cpuset='0,3,6,9'/>
+  </cputune>
   <os>
     <type arch="x86_64" machine="pc-q35-5.2">hvm</type>
     <loader readonly='yes' type='pflash'>/usr/share/edk2-ovmf/x64/OVMF_CODE.fd</loader>
