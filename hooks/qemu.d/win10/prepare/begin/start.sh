@@ -23,3 +23,10 @@ sysctl net.ipv6.conf.all.forwarding=1
 # Stop display manager, fan control service
 systemctl stop sddm.service
 systemctl stop amdgpu-fancontrol.service
+
+# Unbind VTconsoles
+echo 0 > /sys/class/vtconsole/vtcon0/bind
+echo 0 > /sys/class/vtconsole/vtcon1/bind
+
+# Avoid a Race condition by waiting x seconds.
+sleep 7
