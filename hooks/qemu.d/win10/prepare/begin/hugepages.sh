@@ -34,6 +34,10 @@ function kmessageNotify {
 # We define functions here named for each step libvirt calls the hook against
 #   respectively. These will be ran after checks pass at the end of the script.
 function prepare/begin {
+  sync
+  echo 3 > /proc/sys/vm/drop_caches
+  echo 1 > /proc/sys/vm/compact_memory
+  echo never > /sys/kernel/mm/transparent_hugepage/enabled
   # Allocate HugePages
   (( HPG_NEW = HPG_CURRENT + GUEST_MEM / HPG_SIZE ))
   echo "$HPG_NEW" > "$HPG_PATH"
@@ -41,10 +45,16 @@ function prepare/begin {
 }
 
 function release/end {
-  # Unallocate HugePages
-  (( HPG_NEW = HPG_CURRENT - GUEST_MEM / HPG_SIZE ))
-  echo "$HPG_NEW" > "$HPG_PATH"
-  kmessageNotify "Releasing ${GUEST_MEM}kB of HugePages for VM ${GUEST_NAME}"
+  end=$((SECONDS+2))
+  while [ $SECONDS -lt $end ]; do
+    (( HPG_NEW = HPG_CURRENT - GUEST_MEM / HPG_SIZE ))
+    if [[ $(cat "${HPG_PATH}") -ne $HPG_NEW ]]; then
+      # Unallocate HugePages
+      echo "$HPG_NEW" > "$HPG_PATH"
+      kmessageNotify "Releasing ${GUEST_MEM}kB of HugePages for VM ${GUEST_NAME}"
+    fi
+  done
+  echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
 }
 
 # Do some checks before continuing
