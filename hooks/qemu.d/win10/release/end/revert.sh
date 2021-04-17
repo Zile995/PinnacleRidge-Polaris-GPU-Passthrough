@@ -22,3 +22,7 @@ modprobe drm_kms_helper
 modprobe i2c_algo_bit
 modprobe drm
 modprobe snd_hda_intel
+
+# Start AMD GPU Fan control and Display Manager
+systemctl start amdgpu-fancontrol.service
+systemctl start sddm.service
