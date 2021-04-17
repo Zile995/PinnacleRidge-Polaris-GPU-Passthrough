@@ -49,3 +49,15 @@ set_sched_policy() {
     fi
 }
 
+set_affinity() {
+    end=$((SECONDS+15))
+    while [ $SECONDS -lt $end ]; do
+        grep vfio /proc/interrupts | cut -d ":" -f 1 | while read -r i; do
+            if [[ $VIRT_CORES -ne $(cat /proc/irq/$i/smp_affinity_list) ]]; then 
+                echo $(date) Changing smp_affinity for vfio irq $i >> $LOG
+                echo $VIRT_CORES > /proc/irq/$i/smp_affinity_list
+            fi
+        done
+    done
+}
+
