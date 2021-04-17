@@ -29,3 +29,15 @@ set_virt_cores() {
     systemctl set-property --runtime -- machine.slice AllowedCPUs=$VIRT_CORES
     /bin/echo ${VIRT_CORES} > ${CPUSET_PATH}/cpuset.cpus
 }
+
+release_cores() {
+    echo $(date) Releasing CPUs $VIRT_CORES from VM $VM_NAME >> $LOG
+    systemctl set-property --runtime -- user.slice AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime -- system.slice AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime -- init.scope AllowedCPUs=$TOTAL_CORES
+    systemctl set-property --runtime -- machine.slice AllowedCPUs=$TOTAL_CORES
+
+    # Revert changes made to the writeback workqueue
+    echo $TOTAL_CORES_MASK > /sys/bus/workqueue/devices/writeback/cpumask
+    echo 1 > /sys/bus/workqueue/devices/writeback/numa
+}
