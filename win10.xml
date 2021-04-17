@@ -6,8 +6,13 @@
       <libosinfo:os id="http://microsoft.com/win/10"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory unit="KiB">4194304</memory>
-  <currentMemory unit="KiB">4194304</currentMemory>
+  <memory unit='KiB'>12582912</memory>
+  <currentMemory unit='KiB'>12582912</currentMemory>
+  <memoryBacking>
+    <hugepages>
+      <page size='2048' unit='KiB'/>
+    </hugepages>
+  </memoryBacking>
   <vcpu placement='static' current='8'>12</vcpu>
   <vcpus>
     <vcpu id='0' enabled='yes' hotpluggable='no'/>
