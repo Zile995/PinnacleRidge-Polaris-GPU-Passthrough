@@ -6,6 +6,7 @@ TOTAL_CORES_MASK=FFF               # 0-11, bitmask 0b111111111111
 HOST_CORES='0,3,6,9'               # Cores reserved for host
 HOST_CORES_MASK=924                # 0,3,6,9 bitmask 0b100100100100
 VIRT_CORES='1-2,4-5,7-8,10-11'     # Cores reserved for virtual machine(s)
+CPUSET_PATH=/sys/fs/cgroup/machine.slice/machine-qemu*
 
 VM_NAME="$1"
 VM_ACTION="$2/$3"
@@ -21,4 +22,10 @@ set_host_cores() {
     # Restrict the workqueue to use only cpu 0.
     echo $HOST_CORES_MASK > /sys/bus/workqueue/devices/writeback/cpumask
     echo 0 > /sys/bus/workqueue/devices/writeback/numa
+}
+
+set_virt_cores() {
+    echo $(date) Reserving CPUs $VIRT_CORES for VM $VM_NAME >> $LOG
+    systemctl set-property --runtime -- machine.slice AllowedCPUs=$VIRT_CORES
+    /bin/echo ${VIRT_CORES} > ${CPUSET_PATH}/cpuset.cpus
 }
