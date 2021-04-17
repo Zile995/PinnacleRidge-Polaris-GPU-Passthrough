@@ -41,3 +41,11 @@ release_cores() {
     echo $TOTAL_CORES_MASK > /sys/bus/workqueue/devices/writeback/cpumask
     echo 1 > /sys/bus/workqueue/devices/writeback/numa
 }
+
+set_sched_policy() {
+    if pid=$(pidof qemu-system-x86_64); then
+      chrt -f -p 1 $pid
+      echo $(date) Changing scheduling to fifo for qemu pid $pid >> $LOG
+    fi
+}
+
