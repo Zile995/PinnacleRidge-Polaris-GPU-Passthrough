@@ -11,7 +11,10 @@ ip addr add $IP_ADDR dev br0
 ip link set br0 up
 ip link set $DEVICE master br0
 
-[[ ! -d /etc/qemu ]] && mkdir /etc/qemu
+if [[ ! -d /etc/qemu ]]; then
+    mkdir /etc/qemu
+fi
+
 if [ ! -f /etc/qemu/bridge.conf ]; then
     echo allow br0 > /etc/qemu/bridge.conf
 fi
@@ -21,7 +24,7 @@ sysctl net.ipv6.conf.default.forwarding=1
 sysctl net.ipv6.conf.all.forwarding=1
 
 # Stop display manager, fan control service
-systemctl stop sddm.service
+systemctl stop gdm.service
 systemctl stop amdgpu-fancontrol.service
 
 # Unbind VTconsoles

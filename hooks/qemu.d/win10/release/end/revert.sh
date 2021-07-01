@@ -24,10 +24,11 @@ modprobe drm
 modprobe snd_hda_intel
 
 # Start AMD GPU Fan control and Display Manager
-systemctl start amdgpu-fancontrol.service
-systemctl start sddm.service
+systemctl restart amdgpu-fancontrol.service
+systemctl restart gdm.service
 
 # Switch back to Ethernet connection
 nmcli connection down br0
-nmcli connection up "$(nmcli -g name connection show | head -1)"
 ip link delete br0 type bridge
+nmcli connection down virbr0
+nmcli connection up "$(nmcli -g name connection show | head -1)"
