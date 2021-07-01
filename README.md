@@ -153,7 +153,7 @@ systemctl restart virtlogd.service
 
 * For sound: You can passthrough the PCI HD Audio controler ([or you can use qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio)) 
 
-* Set the network interface to bridge, br0 with virtio bus.
+* Set the network source to Bridge device with ```br0``` device name and virtio device model.
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
   ```
@@ -179,4 +179,5 @@ systemctl restart virtlogd.service
 
 * Set the CPU pinning, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
 
-* Move everything inside hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/hooks/
+* Move hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/
+    * ```sudo cp -r hooks /etc/libvirt/```
