@@ -1,78 +1,34 @@
-#! /bin/bash
+#!/bin/bash
 #
-# Author: Stefsinn (https://github.com/Stefsinn)
+# Author: SharkWipf (https://github.com/SharkWipf)
 #
-# This hook automatically un-allocates static HugePages when stopping a VM.
 # This file depends on the PassthroughPOST hook helper script found here:
 # https://github.com/PassthroughPOST/VFIO-Tools/tree/master/libvirt_hooks
-# Place this script in BOTH these directories (or symlink it):
+# This hook only needs to run on `prepare/begin`, not on stop.
+# Place this script in this directory:
 # $SYSCONFDIR/libvirt/hooks/qemu.d/your_vm/prepare/begin/
-# $SYSCONFDIR/libvirt/hooks/qemu.d/your_vm/release/end/
 # $SYSCONFDIR usually is /etc/libvirt.
-# Get inputs from libvirt
-GUEST_NAME="$1"
-GUEST_ACTION="$2/$3"
-# Get path to guest XML
-XML_PATH="/etc/libvirt/qemu/$GUEST_NAME.xml"
-# Get guest HugePage size
-HPG_SIZE=$(grep '<page size' "$XML_PATH" | grep -ohE '[[:digit:]]+')
-# Set path to HugePages
-HPG_PATH="/sys/devices/system/node/node0/hugepages/hugepages-${HPG_SIZE}kB/nr_hugepages"
-# Get current number of HugePages
-HPG_CURRENT=$(cat "${HPG_PATH}")
-# Get amount of memory used by the guest
-GUEST_MEM=$(grep '<memory unit' "$XML_PATH" | grep -ohE '[[:digit:]]+')
+#
+# This hook will help free and compact memory to ease THP allocation.
+# QEMU VMs will use THP (Transparent HugePages) by default if enough
+# unfragmented memory can be found on startup. If your memory is very
+# fragmented, this may cause a slow VM startup (like a slowly responding 
+# VM start button/command), and may cause QEMU to fall back to regular
+# memory pages, slowing down VM performance.
+# If you (suspect you) suffer from this, this hook will help ease THP
+# allocation so you don't need to resort to misexplained placebo scripts.
+#
+# Don't use the old hugepages.sh script in this repo. It's useless.
+# It's only kept in for archival reasons and offers no benefits.
+#
 
-# Define a function used for logging later
-function kmessageNotify {
-  MESSAGE="$1"
-  while read -r line; do
-    echo "libvirt_qemu hugepages: ${line}" > /dev/kmsg 2>&1
-  done < <(echo "${MESSAGE}")
-}
 
-# We define functions here named for each step libvirt calls the hook against
-#   respectively. These will be ran after checks pass at the end of the script.
-function prepare/begin {
-  sync
-  echo 3 > /proc/sys/vm/drop_caches
-  echo 1 > /proc/sys/vm/compact_memory
-  echo never > /sys/kernel/mm/transparent_hugepage/enabled
-  # Allocate HugePages
-  (( HPG_NEW = HPG_CURRENT + GUEST_MEM / HPG_SIZE ))
-  echo "$HPG_NEW" > "$HPG_PATH"
-  kmessageNotify "Allocating ${GUEST_MEM}kB of HugePages for VM ${GUEST_NAME}"
-}
+# Finish writing any outstanding writes to disk.
+sync
+# Drop all filesystem caches to free up more memory.
+echo 3 > /proc/sys/vm/drop_caches
+# Do another run of writing any possible new outstanding writes.
+sync
+# Tell the kernel to "defragment" memory where possible.
+echo 1 > /proc/sys/vm/compact_memory
 
-function release/end {
-  end=$((SECONDS+2))
-  while [ $SECONDS -lt $end ]; do
-    (( HPG_NEW = HPG_CURRENT - GUEST_MEM / HPG_SIZE ))
-    if [[ $(cat "${HPG_PATH}") -ne $HPG_NEW ]]; then
-      # Unallocate HugePages
-      echo "$HPG_NEW" > "$HPG_PATH"
-      kmessageNotify "Releasing ${GUEST_MEM}kB of HugePages for VM ${GUEST_NAME}"
-    fi
-  done
-  echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
-}
-
-# Do some checks before continuing
-if [[ $HPG_SIZE -eq 0 ]]; then
-  # Break if HugePage size is 0
-  echo "ERROR: HugePage size cannot be 0." >&2
-  exit 1
-elif [[ -z $GUEST_MEM ]]; then
-  echo "ERROR: Can't determine guest's memory allocation" >&2
-  exit 1
-elif [[ ! -f "$HPG_PATH"  ]]; then
-  # Break if HugePages path doesn't exist
-  echo "ERROR: ${HPG_PATH} does not exist. (HugePages disabled in kernel?)" >&2
-  exit 1
-elif [[ -z $HPG_SIZE ]]; then
-  # This exits silently if HugePages appear disabled for a guest
-  exit 0
-fi
-
-# All checks passed, continue
-${GUEST_ACTION}
