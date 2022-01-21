@@ -25,7 +25,8 @@ sysctl net.ipv6.conf.all.forwarding=1
 
 # Stop display manager, fan control service
 systemctl stop gdm.service
-systemctl stop amdgpu-fancontrol.service
+systemctl stop amdfand.service
+#systemctl stop amdgpu-fancontrol.service
 
 # Unbind VTconsoles
 echo 0 > /sys/class/vtconsole/vtcon0/bind
