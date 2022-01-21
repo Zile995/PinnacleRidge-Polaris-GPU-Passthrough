@@ -1,8 +1,8 @@
 # My AMD Single GPU Passthrough
 * Operating System: Arch Linux
-* DE: KDE Plasma
+* DE: Gnome 41.3
 * OS Type: 64-bit
-* Graphics Platform: X11
+* Graphics Platform: Wayland
 * Processors: 12 × AMD Ryzen 5 2600 Six-Core Processor
 * Memory: 16 GiB of RAM
 * Graphics Processor: Radeon RX 580 Sapphire Nitro+
@@ -10,7 +10,19 @@
 
 ## Ryzen 5 2600 CPU Topology example:
 
-![Screenshot_20210417_121900](https://user-images.githubusercontent.com/32335484/115109624-32f87380-9f77-11eb-8081-7054ef6a1eff.png)
+<details>
+  <summary>System topology (lstopo)</summary>
+  
+  ![Screenshot_20210417_121900](https://user-images.githubusercontent.com/32335484/115109624-32f87380-9f77-11eb-8081-7054ef6a1eff.png)          
+
+</details>
+
+<details>
+  <summary>Coreinfo L3 cache</summary>
+  
+  ![Coreinfo](https://user-images.githubusercontent.com/32335484/150604836-d8f342f6-f35b-4aaa-b759-d4e83cb3ddc6.png)
+
+</details>
 
 
 ``` 
@@ -24,23 +36,9 @@
 | __ __ __ __ __ __ __ __ | | __ __ __ __ __ __ __ __ |
 
 
-# XML Config, Ryzen 2600 topology example:
-
-  <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
-    <topology sockets='1' dies='1' cores='6' threads='2'/>  <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
-    <cache mode='passthrough'/>                       <!-- The real CPU cache data reported by the host CPU will be passed through to the virtual CPU -->
-    <feature policy='require' name='topoext'/>  
-    <feature policy='require' name='svm'/>
-    <feature policy='require' name='apic'/>           <!-- Enable various features improving behavior of guests running Microsoft Windows -->
-    <feature policy='require' name='hypervisor'/>
-    <feature policy='require' name='invtsc'/>
-  </cpu>
-```
-
-```
  XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example:
  
- <vcpu placement='static' current='8'>12</vcpu> <!-- I will use only 8 cores, rest will be disabled in VM and used for the HOST machine (emulatorpin) -->
+ <vcpu placement='static' current='8'>12</vcpu>  <!-- I will use only 8 cores, rest will be disabled in VM and used for the HOST machine (emulatorpin) -->
   <vcpus>
     <vcpu id='0' enabled='yes' hotpluggable='no'/>
     <vcpu id='1' enabled='yes' hotpluggable='yes'/>
@@ -60,17 +58,28 @@
     <vcpupin vcpu='1' cpuset='7'/>
     <vcpupin vcpu='2' cpuset='2'/>
     <vcpupin vcpu='3' cpuset='8'/>
-    <vcpupin vcpu='8' cpuset='4'/>     <!-- Notice that after vCPU3, we defined vCPU8. We disabled 4,5,6,7 vCPUs -->
+    <vcpupin vcpu='8' cpuset='4'/>    <!-- Notice that after vCPU3, we defined vCPU8. We disabled 4,5,6,7 vCPUs -->
     <vcpupin vcpu='9' cpuset='10'/>
     <vcpupin vcpu='10' cpuset='5'/>
     <vcpupin vcpu='11' cpuset='11'/>
-    <emulatorpin cpuset='0,3,6,9'/>    <!-- Threads reserved for host machine (in my case Core#0 and Core#3) -->
-  </cputune>                  
-                               
+    <emulatorpin cpuset='0,3,6,9'/>   <!-- Threads reserved for host machine (in my case Core#0 and Core#3) -->
+  </cputune>
+```
+
+```
+  <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
+    <topology sockets='1' dies='1' cores='6' threads='2'/>    <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
+    <cache mode='passthrough'/>                     <!-- The real CPU cache data reported by the host CPU will be passed through to the virtual CPU -->
+    <feature policy='require' name='topoext'/>  
+    <feature policy='require' name='svm'/>
+    <feature policy='require' name='apic'/>         <!-- Enable various features improving behavior of guests running Microsoft Windows -->
+    <feature policy='require' name='hypervisor'/>
+    <feature policy='require' name='invtsc'/>
+  </cpu>                               
 ```
 ## IOMMU, libvirt and QEMU configuration
 
-* Make sure you enable IOMMU in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
+* Make sure IOMMU is enabled in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
 * Append ```amd_iommu=on iommu=pt``` kernel parameters in: /etc/default/grub
   ```
@@ -161,19 +170,6 @@ systemctl restart virtlogd.service
     </source>
     <rom file='/var/lib/libvirt/vbios/yourvbiosname.rom'/>  <!-- Place here -->
     <address/>
-    ...
-  ```
-
-* Enable hugepages and configure size:
-  ```
-    ...
-    <memory unit='KiB'>12582912</memory>
-    <currentMemory unit='KiB'>12582912</currentMemory>  
-    <memoryBacking>
-      <hugepages>
-        <page size='2048' unit='KiB'/>
-      </hugepages>
-    </memoryBacking>
     ...
   ```
 
