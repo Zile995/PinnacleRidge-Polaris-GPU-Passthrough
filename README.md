@@ -24,6 +24,9 @@
 
 </details>
 
+<details>
+<summary>XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example</summary>
+	
 ``` 
             L3                          L3
 
@@ -33,8 +36,6 @@
 |      \                  | |     \                   |
 |      Reserved for Host  | |      Reserved for Host  |
 | __ __ __ __ __ __ __ __ | | __ __ __ __ __ __ __ __ |
-
- XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example:
  
  <vcpu placement='static' current='8'>12</vcpu>  <!-- I will use only 8 cores, rest will be disabled in VM and used for the HOST machine (emulatorpin) -->
   <vcpus>
@@ -91,6 +92,8 @@ Enabling Hyper-V enlightenments (Windows only)
     <feature policy='require' name='invtsc'/>
   </cpu>                               
 ```
+	
+</details>
 
 ## IOMMU, libvirt and QEMU configuration
 
