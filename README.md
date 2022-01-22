@@ -91,9 +91,9 @@
   sudo grub-mkconfig -o /boot/grub/grub.cfg 
   ```
 
-* Install all Arch Linux packages:
+* Install the necessary Arch Linux packages:
   ```
-  sudo pacman -S qemu qemu-arch-extra edk2-ovmf vde2 iptables-nft dnsmasq bridge-utils libvirt virt-manager
+  sudo pacman -S qemu edk2-ovmf libvirt iptables-nft dnsmasq dmidecode bridge-utils virt-manager
   ```
 
 * Enable and start libvirt services:
