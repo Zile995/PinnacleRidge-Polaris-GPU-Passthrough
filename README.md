@@ -65,6 +65,22 @@
 ```
 
 ```
+Enabling Hyper-V enlightenments (Windows only)
+
+  <hyperv>
+    <relaxed state='on'/>
+    <vapic state='on'/>
+    <spinlocks state='on' retries='8191'/>
+    <vpindex state='on'/>
+    <runtime state='on'/>
+    <synic state='on'/>
+    <stimer state='on'/>
+    <reset state='on'/>
+    <frequencies state='on'/>
+  </hyperv>
+```
+
+```
   <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
     <topology sockets='1' dies='1' cores='6' threads='2'/>    <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
     <cache mode='passthrough'/>                     <!-- The real CPU cache data reported by the host CPU will be passed through to the virtual CPU -->
