@@ -231,3 +231,9 @@ systemctl restart virtlogd.service
     <address/>
     ...
   ``` 
+
+## Logging
+
+* You can check all hook logs with ```sudo cat /dev/kmsg | grep libvirt-qemu```
+
+* You can check all libvirt logs in ```/var/log/libvirt/libvirtd.log``` file
