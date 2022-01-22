@@ -24,7 +24,6 @@
 
 </details>
 
-
 ``` 
             L3                          L3
 
@@ -34,7 +33,6 @@
 |      \                  | |     \                   |
 |      Reserved for Host  | |      Reserved for Host  |
 | __ __ __ __ __ __ __ __ | | __ __ __ __ __ __ __ __ |
-
 
  XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example:
  
@@ -77,11 +75,13 @@
     <feature policy='require' name='invtsc'/>
   </cpu>                               
 ```
+
 ## IOMMU, libvirt and QEMU configuration
 
 * Make sure IOMMU is enabled in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
-* Append ```amd_iommu=on iommu=pt``` kernel parameters in: /etc/default/grub
+* Append ```amd_iommu=on iommu=pt``` [kernel parameters](https://wiki.archlinux.org/title/kernel_parameters). 
+  If you are using the GRUB bootloader, change the /etc/default/grub: 
   ```
   GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet amdgpu.ppfeaturemask=0xffffffff amd_iommu=on iommu=pt"
   ```
@@ -145,6 +145,7 @@ systemctl restart virtlogd.service
     ```
 
 ## Windows 10 virt-manager preparation and installation (without going into details)
+* You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
 * Open the virt-manager and prepare Windows 10 iso, also use the raw image virtio disk.
 
@@ -156,11 +157,53 @@ systemctl restart virtlogd.service
 
 * After the installation, boot in Windows and install all virtio drivers from device manager. You can get drivers from virtio-win.iso
 
-* Add GPU PCI Host devices, both GPU and HDMI devices. Remove DisplaySpice, VideoQXL and other serial devices.
+* Test the CPU pinning before the GPU passthrough, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
+
+* Next, you will need to add and edit libvirt hook scripts 
+ 
+## Libvirt hooks
+
+* <details>
+  <summary>Directory structure</summary>
+
+  ![tree](https://user-images.githubusercontent.com/32335484/150632869-0eaa1944-da78-4d75-92d4-b19a536aa602.png)
+
+  </details>
+  
+* Move hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/
+    * ```sudo cp -r hooks /etc/libvirt/```
+  
+* You will need to **examine and edit** the scripts.
+  * For ```virsh nodedev-detach``` and ```virsh nodedev-reattach``` commands in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts you will need PCI IDs
+  
+  * You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lscpi -k``` command:
+    ```
+    0a:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
+	  Subsystem: Sapphire Technology Limited Nitro+ Radeon RX 570/580/590
+	  Kernel driver in use: amdgpu    <- We need to unload this driver
+	  Kernel modules: amdgpu    
+    
+    0a:00.1 Audio device: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere HDMI Audio [Radeon RX 470/480 / 570/580/590]
+ 	  Subsystem: Sapphire Technology Limited Device aaf0
+	  Kernel driver in use: snd_hda_intel
+	  Kernel modules: snd_hda_intel
+    ```
+  * In my case, IDs will be ```0a:00.0``` and ```0a:00.1```: 
+    ```
+    * Final IDs
+    * VGA GPU ID:          pci_0000_0a_00_0
+    * GPU HDMI Audio ID:   pci_0000_0a_00_1
+    ```
+  * I use bridge network in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts, you might not need this.
+  
+## Passthrough (virt-manager)
+* You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
+
+* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI devices. Remove DisplaySpice, VideoQXL and other serial devices.
 
 * Add USB Host devices, like keyboard, mouse... You can also follow [this tutorial](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)  
 
-* For sound: You can passthrough the PCI HD Audio controler ([or you can use qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio)) 
+* For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_JACK_and_PipeWire)
 
 * Set the network source to Bridge device with ```br0``` device name and virtio device model.
 
@@ -171,9 +214,4 @@ systemctl restart virtlogd.service
     <rom file='/var/lib/libvirt/vbios/yourvbiosname.rom'/>  <!-- Place here -->
     <address/>
     ...
-  ```
-
-* Set the CPU pinning, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
-
-* Move hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/
-    * ```sudo cp -r hooks /etc/libvirt/```
+  ``` 
