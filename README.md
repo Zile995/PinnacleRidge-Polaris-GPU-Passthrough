@@ -112,7 +112,7 @@ Enabling Hyper-V enlightenments (Windows only)
 
 * Install the necessary Arch Linux packages:
   ```
-  sudo pacman -S qemu edk2-ovmf libvirt iptables-nft dnsmasq dmidecode bridge-utils virt-manager
+  sudo pacman -S qemu-desktop edk2-ovmf libvirt iptables-nft dnsmasq bridge-utils virt-manager
   ```
 
 * Enable and start libvirt services:
