@@ -1,7 +1,6 @@
 # My AMD Single GPU Passthrough
 * Operating System: Arch Linux
-* DE: Gnome 41.3
-* OS Type: 64-bit
+* DE: Gnome
 * Graphics Platform: Wayland
 * Processors: 12 × AMD Ryzen 5 2600 Six-Core Processor
 * Memory: 16 GiB of RAM
