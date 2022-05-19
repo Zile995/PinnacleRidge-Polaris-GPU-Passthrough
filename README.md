@@ -171,9 +171,9 @@ systemctl restart virtlogd.service
 
 * Before installing the Windows 10, mount the [virtio-win.iso](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) disk first in virt-manager
 
-* In order to recognize virtio disk, don't forget to load virtio driver from virtio-win.iso in Windows installation.
+* In order to recognize virtio disk, don't forget to load virtio driver from virtio-win.iso in the Windows installation.
 
-* After the installation, boot in Windows and install all virtio drivers from device manager. You can get drivers from virtio-win.iso
+* After the installation, boot into Windows and install all virtio drivers from the device manager. You can get drivers from virtio-win.iso
 
 * Test the CPU pinning before the GPU passthrough, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
 
