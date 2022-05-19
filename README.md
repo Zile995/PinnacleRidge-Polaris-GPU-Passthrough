@@ -213,7 +213,6 @@ systemctl restart virtlogd.service
     * VGA GPU ID:          pci_0000_0a_00_0
     * GPU HDMI Audio ID:   pci_0000_0a_00_1
     ```
-  * I use bridge network in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts, you might not need this.
   
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
@@ -224,7 +223,7 @@ systemctl restart virtlogd.service
 
 * For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_JACK_and_PipeWire)
 
-* Set the network source to Bridge device with ```br0``` device name and virtio device model.
+* Set the network source to Bridge device with ```virbr0``` device name and virtio device model.
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
   ```
