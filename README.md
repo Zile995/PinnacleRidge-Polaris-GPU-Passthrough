@@ -194,7 +194,7 @@ systemctl restart virtlogd.service
 * You will need to **examine and edit** the scripts.
   * For ```virsh nodedev-detach``` and ```virsh nodedev-reattach``` commands in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts you will need PCI IDs
   
-  * You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lscpi -k``` command:
+  * You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lspci -k``` command:
     ```
     0a:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
 	  Subsystem: Sapphire Technology Limited Nitro+ Radeon RX 570/580/590
