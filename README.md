@@ -1,11 +1,17 @@
 # My AMD Single GPU Passthrough
-* Operating System: Arch Linux
-* DE: Gnome
-* Graphics Platform: Wayland
-* Processors: 12 × AMD Ryzen 5 2600 Six-Core Processor
-* Memory: 16 GiB of RAM
-* Graphics Processor: Radeon RX 580 Sapphire Nitro+
-* Motherboard: ASRock B450 Pro4
+
+<details>
+  <summary>Hardware specifications</summary>
+
+    * Operating System: Arch Linux
+    * DE: Gnome
+    * Graphics Platform: Wayland
+    * Processors: 12 × AMD Ryzen 5 2600 Six-Core Processor
+    * Memory: 16 GiB of RAM
+    * Graphics Processor: Radeon RX 580 Sapphire Nitro+
+    * Motherboard: ASRock B450 Pro4
+
+</details>
 
 ## Ryzen 5 2600 CPU Topology example:
 
