@@ -119,6 +119,10 @@ Enabling Hyper-V enlightenments (Windows only)
   ```
   sudo pacman -S qemu-desktop edk2-ovmf libvirt iptables-nft dnsmasq bridge-utils virt-manager
   ```
+  * For Windows 11 installation, you will need a TPM emulator, install this package:
+    ```
+    sudo pacman -S swtpm
+    ```   
 
 * Enable and start libvirt services:
   ```
@@ -168,14 +172,14 @@ systemctl restart virtlogd.service
     sudo chown yourusername:yourusername /var/lib/libvirt/vbios/yourvbiosname.rom
     ```
 
-## Windows 10 virt-manager preparation and installation (without going into details)
+## Windows 10/11 virt-manager preparation and installation (without going into details)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
-* Open the virt-manager and prepare Windows 10 iso, also use the raw image virtio disk.
+* Open the virt-manager and prepare Windows iso, also use the raw image virtio disk. For Windows 11, you need to have over 54 GB of storage space.
 
-* Use the Q35 chipset and UEFI OVMF_CODE loader 
+* Use the Q35 chipset and UEFI OVMF_CODE loader. For Windows 11, use the secure boot loader OVMF_CODE.secboot.fd. 
 
-* Before installing the Windows 10, mount the [virtio-win.iso](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) disk first in virt-manager
+* Before installing the Windows, mount the [virtio-win.iso](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) disk first in virt-manager
 
 * In order to recognize virtio disk, don't forget to load virtio driver from virtio-win.iso in the Windows installation.
 
