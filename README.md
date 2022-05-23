@@ -175,17 +175,51 @@ systemctl restart virtlogd.service
 ## Windows 10/11 virt-manager preparation and installation (without going into details)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
-* Open the virt-manager and prepare Windows iso, also use the raw image virtio disk. For Windows 11, you need to have over 54 GB of storage space.
+* Open the virt-manager and prepare Windows iso, also use the ```raw``` image virtio disk. For Windows 11, you need to have over 54 GB of storage space.
 
 * Use the Q35 chipset and UEFI OVMF_CODE loader. For Windows 11, use the secure boot loader OVMF_CODE.secboot.fd. 
 
 * Before installing the Windows, mount the [virtio-win.iso](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) disk first in virt-manager
+  * <details>
+	
+      <summary>virt-manager virtio-win.iso mounting</summary>
+  
+      ![Screenshot from 2022-05-23 15-24-43](https://user-images.githubusercontent.com/32335484/169831867-c173ccae-de54-4bf4-bf7e-e1a29f855f33.png)
+
+    </details>
+    
+* For Win11 installation, add a TPM emulator in your xml file
+  * ```
+    <tpm model="tpm-tis">
+      <backend type="emulator" version="2.0"/>
+    </tpm>
+    ```
 
 * In order to recognize virtio disk, don't forget to load virtio driver from virtio-win.iso in the Windows installation.
+  * <details>
+	
+      <summary>Virtio storage driver loading procedure</summary>
+  
+      ![Screenshot from 2022-05-21 17-31-56](https://user-images.githubusercontent.com/32335484/169829750-a95c0d90-78ed-4b86-ad86-9d6f71557cf7.png)
+	
+      ![Screenshot from 2022-05-21 17-31-11](https://user-images.githubusercontent.com/32335484/169829787-58e1fa9e-994d-4b45-8726-9e28ce684049.png)
+	
+      ![Screenshot from 2022-05-21 17-32-27](https://user-images.githubusercontent.com/32335484/169829829-476fd7c4-fa7e-43f5-b0ee-de57a5d0e833.png)
+
+    </details>
 
 * After the installation, boot into Windows and install all virtio drivers from the device manager. You can get drivers from virtio-win.iso
+    * <details>
+	
+        <summary>Virtio Windows drivers</summary>
+  
+        ![Screenshot from 2022-05-21 17-43-50](https://user-images.githubusercontent.com/32335484/169830239-0d79a8d8-3f13-42d1-bdb8-c3ba5429536b.png)
 
-* Test the CPU pinning before the GPU passthrough, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
+        ![Screenshot from 2022-05-21 17-45-29](https://user-images.githubusercontent.com/32335484/169830274-40d7e230-7183-4301-91df-6d8e8d5d227d.png)
+
+    </details>
+
+* Test the CPU pinning before the GPU passthrough. Edit your xml file, for details, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
 
 * Next, you will need to add and edit libvirt hook scripts 
  
@@ -200,6 +234,8 @@ systemctl restart virtlogd.service
   
 * Move hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/
     * ```sudo cp -r hooks /etc/libvirt/```
+
+* Make sure the folder name in ```/etc/libvirt/hooks/qemu.d/``` matches the name of the virtual machine. Rename win10 if necessary.
   
 * You will need to **examine and edit** the scripts.
   * For ```virsh nodedev-detach``` and ```virsh nodedev-reattach``` commands in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts you will need PCI IDs
@@ -226,13 +262,25 @@ systemctl restart virtlogd.service
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
-* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI devices. Remove DisplaySpice, VideoQXL and other serial devices.
+* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI Audio devices. Remove DisplaySpice, VideoQXL and other serial devices.
+  * <details>
+	
+      <summary>Adding GPU PCI Host devices</summary>
+  
+      ![Screenshot from 2022-05-23 15-48-07](https://user-images.githubusercontent.com/32335484/169833957-2c48ff46-bd9c-40a7-95c1-2c3bc72bc72a.png)
+
+    </details>
 
 * Add USB Host devices, like keyboard, mouse... You can also follow [this tutorial](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)  
 
 * For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_JACK_and_PipeWire)
 
 * Set the network source to Bridge device with ```virbr0``` device name and virtio device model.
+  * <details>
+	
+      <summary>virt-manager network configuration</summary>
+  
+    </details>  
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
   ```
