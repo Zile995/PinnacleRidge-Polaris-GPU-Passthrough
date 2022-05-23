@@ -275,11 +275,13 @@ systemctl restart virtlogd.service
 
 * For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_VM_audio_to_host_via_JACK_and_PipeWire)
 
-* Set the network source to Bridge device with ```virbr0``` device name and virtio device model.
+* Set the network source to ```Bridge device``` with ```virbr0``` device name and ```virtio``` device model.
   * <details>
 	
       <summary>virt-manager network configuration</summary>
-  
+	
+      ![Screenshot from 2022-05-23 15-58-43](https://user-images.githubusercontent.com/32335484/169836330-874c4f3a-06dd-4fb9-81fd-ba3c89ec0359.png)
+	
     </details>  
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
