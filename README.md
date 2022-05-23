@@ -258,7 +258,9 @@ systemctl restart virtlogd.service
     * VGA GPU ID:          pci_0000_0a_00_0
     * GPU HDMI Audio ID:   pci_0000_0a_00_1
     ```
-  
+
+* The release script [cpu_mode_ondemand.sh](https://github.com/Zile995/PinnacleRidge-Polaris-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/cpu_mode_ondemand.sh) will set the ondemand governor. Change to schedutil if necessary.
+    
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
