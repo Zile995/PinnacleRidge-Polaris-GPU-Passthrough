@@ -202,8 +202,6 @@
       </source>
       <address type='usb' bus='0' port='2'/>
     </hostdev>
-    <memballoon model='virtio'>
-      <address type='pci' domain='0x0000' bus='0x05' slot='0x00' function='0x0'/>
-    </memballoon>
+    <memballoon model='none'/>	
   </devices>
 </domain>
