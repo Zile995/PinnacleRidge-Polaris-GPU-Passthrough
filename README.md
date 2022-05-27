@@ -244,7 +244,7 @@ systemctl restart virtlogd.service
 * <details>
   <summary>Directory structure</summary>
 
-  ![tree](https://user-images.githubusercontent.com/32335484/150632869-0eaa1944-da78-4d75-92d4-b19a536aa602.png)
+  ![tree](https://user-images.githubusercontent.com/32335484/170743513-347ccb10-f963-4da2-8cd4-c0adfffe9870.png)
 
   </details>
   
