@@ -97,7 +97,18 @@ Enabling Hyper-V enlightenments (Windows only)
     <feature policy='require' name='invtsc'/>
   </cpu>                               
 ```
-	
+
+```
+  <clock offset="localtime">
+    <timer name="rtc" present="no" tickpolicy="catchup"/>
+    <timer name="pit" present="no" tickpolicy="delay"/>
+    <timer name="hpet" present="no"/>
+    <timer name="kvmclock" present="no"/>
+    <timer name="hypervclock" present="yes"/>
+    <timer name="tsc" present="yes" mode="native"/>
+  </clock>
+```	
+
 </details>
 
 ## IOMMU, libvirt and QEMU configuration
