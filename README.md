@@ -188,12 +188,12 @@ systemctl restart virtlogd.service
 
     </details>
     
-* For Win11 installation, add a TPM emulator in your xml file
-  * ```
-    <tpm model="tpm-tis">
-      <backend type="emulator" version="2.0"/>
-    </tpm>
-    ```
+* For Win11 installation, add a TPM emulator in your xml file:
+  ```
+  <tpm model="tpm-tis">
+    <backend type="emulator" version="2.0"/>
+  </tpm>
+  ```
 
 * In order to recognize virtio disk, don't forget to load virtio driver from virtio-win.iso in the Windows installation.
   * <details>
@@ -218,6 +218,11 @@ systemctl restart virtlogd.service
         ![Screenshot from 2022-05-21 17-45-29](https://user-images.githubusercontent.com/32335484/169830274-40d7e230-7183-4301-91df-6d8e8d5d227d.png)
 
     </details>
+
+* Disable memballoon in your xml file:
+  ```
+  <memballoon model="none"/>
+  ```
 
 * Test the CPU pinning before the GPU passthrough. Edit your xml file, for details, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
 
