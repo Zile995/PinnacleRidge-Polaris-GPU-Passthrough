@@ -4,7 +4,7 @@ set -x
 
 # Stop display manager, fan control service
 systemctl stop gdm.service
-systemctl stop amdfand.service
+#systemctl stop amdfand.service
 #systemctl stop amdgpu-fancontrol.service
 
 # Unbind VTconsoles

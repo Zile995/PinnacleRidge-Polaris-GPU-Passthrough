@@ -25,5 +25,5 @@ modprobe snd_hda_intel
 
 # Start AMD GPU Fan control and Display Manager
 #systemctl restart amdgpu-fancontrol.service
-systemctl restart amdfand.service
+#systemctl restart amdfand.service
 systemctl restart gdm.service
