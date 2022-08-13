@@ -235,7 +235,7 @@ systemctl restart virtlogd.service
   <memballoon model="none"/>
   ```
 
-* Test the CPU pinning before the GPU passthrough. Edit your xml file, for details, [check out the topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
+* Test the CPU pinning before the GPU passthrough. Edit your xml file, for details, [check out the 6-core CPUs topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). **For 8-core CPUs** check [this reddit post](https://www.reddit.com/r/VFIO/comments/erwzrg/comment/ftr99em/)! Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
 
 * Next, you will need to add and edit libvirt hook scripts 
  
