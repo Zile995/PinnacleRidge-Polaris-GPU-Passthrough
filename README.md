@@ -128,13 +128,17 @@ Enabling Hyper-V enlightenments (Windows only)
 
 * Install the necessary Arch Linux packages:
   ```
-  sudo pacman -S qemu-desktop edk2-ovmf libvirt iptables-nft dnsmasq bridge-utils virt-manager
+  sudo pacman -S qemu-desktop edk2-ovmf libvirt iptables-nft dnsmasq bridge-utils dmidecode virt-manager
   ```
+  * For remote management over SSH, install this package:
+    ```
+    sudo pacman -S openbsd-netcat
+    ```  
   * For Windows 11 installation, you will need a TPM emulator, install this package:
     ```
     sudo pacman -S swtpm
-    ```   
-
+    ```
+    
 * Enable and start libvirt services:
   ```
   systemctl enable --now libvirtd.service
