@@ -175,10 +175,10 @@ Enabling Hyper-V enlightenments (Windows only)
     ```
 
 * Restart the libvirt services after every modification:
-```
-systemctl restart libvirtd.service
-systemctl restart virtlogd.service
-```
+  ```
+  systemctl restart libvirtd.service
+  systemctl restart virtlogd.service
+  ```
 
 * Find your [RX 580 VBIOS.rom](https://www.techpowerup.com/vgabios/?architecture=AMD&manufacturer=&model=RX+580&version=&interface=&memType=GDDR5&memSize=&since=) file and place it in /var/lib/libvirt/vbios/
   * Set the correct permissions and ownership:
