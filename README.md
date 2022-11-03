@@ -115,10 +115,10 @@ Enabling Hyper-V enlightenments (Windows only)
 
 * Make sure IOMMU is enabled in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
-* Append ```amd_iommu=on iommu=pt``` [kernel parameters](https://wiki.archlinux.org/title/kernel_parameters). 
+* Append ```iommu=pt iommu=1``` [kernel parameters](https://wiki.archlinux.org/title/kernel_parameters). 
   If you are using the GRUB bootloader, change the /etc/default/grub: 
   ```
-  GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet amdgpu.ppfeaturemask=0xffffffff amd_iommu=on iommu=pt"
+  GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet amdgpu.ppfeaturemask=0xffffffff iommu=pt iommu=1"
   ```
 
 * Update the GRUB configuration and reboot:
