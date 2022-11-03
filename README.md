@@ -111,7 +111,7 @@ Enabling Hyper-V enlightenments (Windows only)
 
 </details>
 
-## IOMMU, libvirt and QEMU configuration
+## IOMMU, libvirt, QEMU and VBIOS configuration
 
 * Make sure IOMMU is enabled in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
@@ -173,15 +173,24 @@ Enabling Hyper-V enlightenments (Windows only)
     user = "yourusername"
     group = "kvm"
     ```
-
+    
+* You might need to start default network manually:
+  ```
+  virsh net-start default
+  virsh net-autostart default
+  ```
+  
 * Restart the libvirt services after every modification:
   ```
   systemctl restart libvirtd.service
   systemctl restart virtlogd.service
   ```
 
-* Find your [RX 580 VBIOS.rom](https://www.techpowerup.com/vgabios/?architecture=AMD&manufacturer=&model=RX+580&version=&interface=&memType=GDDR5&memSize=&since=) file and place it in /var/lib/libvirt/vbios/
-  * Set the correct permissions and ownership:
+* Dump your vBIOS with [amdvbflash](https://github.com/stylesuxx/amdvbflash):
+  * Dump it with: ```sudo amdvbflash -s 0 yourvbiosname.rom```
+  * vBIOS will be created in home directory
+  * Move your GPU vBIOS file to ```/var/lib/libvirt/vbios``` directory. If you don't have this directory, create it. 
+  * Set the correct permissions and ownership for your vBIOS file:
     ```
     sudo chmod -R 775 /var/lib/libvirt/vbios/yourvbiosname.rom
     sudo chown yourusername:yourusername /var/lib/libvirt/vbios/yourvbiosname.rom
