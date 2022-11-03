@@ -261,10 +261,10 @@ Enabling Hyper-V enlightenments (Windows only)
 
   </details>
   
-* Move hooks [folder](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) from this repository to /etc/libvirt/
+* Move [hooks](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) directory from this repository to /etc/libvirt/
     * ```sudo cp -r hooks /etc/libvirt/```
 
-* Make sure the folder name in ```/etc/libvirt/hooks/qemu.d/``` matches the name of the virtual machine. Rename win10 if necessary.
+* Make sure the directory name in ```/etc/libvirt/hooks/qemu.d/``` matches the name of the virtual machine. Rename win10 if necessary.
   
 * You will need to **examine and edit** the scripts.
   * You have to edit ```/etc/libvirt/hooks/cores.conf``` file. Edit each core variable, for systemd cpu pinning. The values ​​must match the values (vcpupin and emulatiorpin cores) ​​in the xml file. Also, edit masks.
