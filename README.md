@@ -259,10 +259,8 @@ Enabling Hyper-V enlightenments (Windows only)
   
 * You will need to **examine and edit** the scripts.
   * You have to edit ```/etc/libvirt/hooks/cores.conf``` file. Edit each core variable, for systemd cpu pinning. The values ​​must match the values (vcpupin and emulatiorpin cores) ​​in the xml file. Also, edit masks.
-
-  * For ```virsh nodedev-detach``` and ```virsh nodedev-reattach``` commands in [start.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/prepare/begin/start.sh) and [revert.sh](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/revert.sh) scripts you will need PCI IDs
   
-  * You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lspci -k``` command:
+  * You have to edit ```/etc/libvirt/hooks/kvm.conf``` file. Edit ```VIRSH_GPU_VIDEO``` and ```VIRSH_GPU_VIDEO``` variables. You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lspci -k``` command:
     ```
     0a:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
 	  Subsystem: Sapphire Technology Limited Nitro+ Radeon RX 570/580/590
@@ -274,14 +272,14 @@ Enabling Hyper-V enlightenments (Windows only)
 	  Kernel driver in use: snd_hda_intel
 	  Kernel modules: snd_hda_intel
     ```
-  * In my case, IDs will be ```0a:00.0``` and ```0a:00.1```: 
+  * In my case, final IDs for ```0a:00.0``` and ```0a:00.1``` devices will be: 
     ```
     * Final IDs
-    * VGA GPU ID:          pci_0000_0a_00_0
-    * GPU HDMI Audio ID:   pci_0000_0a_00_1
+    * VIRSH_GPU_VIDEO:   0000:0a:00.0
+    * VIRSH_GPU_VIDEO:   0000:0a:00.1
     ```
 
-* The release script [cpu_mode_ondemand.sh](https://github.com/Zile995/PinnacleRidge-Polaris-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/cpu_mode_ondemand.sh) will set the ondemand governor. Change to schedutil if necessary.
+* The release script [release.sh](https://github.com/Zile995/PinnacleRidge-Polaris-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/release.sh) will set the ondemand governor. Change ```set_ondemand_governor()``` function in ```release.sh``` to schedutil if necessary.
     
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
