@@ -284,7 +284,28 @@ Enabling Hyper-V enlightenments (Windows only)
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
-* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI Audio devices. Remove DisplaySpice, VideoQXL and other serial devices.
+* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI Audio devices. Remove DisplaySpice, VideoQXL and other serial devices only from XML file.
+  * ```
+    <!-- Remove Display Spice -->
+    <graphics type="spice" port="-1" tlsPort="-1" autoport="yes">
+      <image compression="off"/>
+    </graphics>
+    
+    <!-- Remove USB Redirection -->
+    <redirdev bus="usb" type="spicevmc"/>
+    <redirdev bus="usb" type="spicevmc"/>
+    
+    <!-- Remove Video QXL -->
+    <video>
+      <model type="qxl"/>
+    </video>
+    
+    <!-- Remove Tablet -->
+    <input type="tablet" bus="usb"/>
+    
+    <!-- Remove console -->
+    <console type="pty"/>
+    ```
   * <details>
 	
       <summary>Adding GPU PCI Host devices</summary>
