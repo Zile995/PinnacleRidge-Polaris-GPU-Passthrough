@@ -257,7 +257,7 @@ Enabling Hyper-V enlightenments (Windows only)
 * <details>
   <summary>Directory structure</summary>
 
-  ![tree](https://user-images.githubusercontent.com/32335484/170743513-347ccb10-f963-4da2-8cd4-c0adfffe9870.png)
+  ![tree](https://user-images.githubusercontent.com/32335484/199718994-785eb7a2-0718-4575-9f11-98842bd44671.png)
 
   </details>
   
