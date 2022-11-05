@@ -1,4 +1,4 @@
-# My AMD Single GPU Passthrough
+# AMD Single GPU Passthrough
 
 <details>
   <summary>Hardware specifications</summary>
@@ -29,96 +29,14 @@
 
 </details>
 
-<details>
-<summary>XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example</summary>
-	
-``` 
-            L3                          L3
+## IOMMU, libvirt, QEMU and vBIOS configuration
 
-|   Core#0 Core#1 Core#2  | |  Core#3 Core#4 Core#5   |
-|    |0|     1      2     | |   |3|     4      5      |
-|    |6|     7      8     | |   |9|     10     11     |
-|      \                  | |     \                   |
-|      Reserved for Host  | |      Reserved for Host  |
-| __ __ __ __ __ __ __ __ | | __ __ __ __ __ __ __ __ |
- 
- <vcpu placement='static' current='8'>12</vcpu>  <!-- I will use only 8 cores, rest will be disabled in VM and used for the HOST machine (emulatorpin) -->
-  <vcpus>
-    <vcpu id='0' enabled='yes' hotpluggable='no'/>
-    <vcpu id='1' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='2' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='3' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='4' enabled='no' hotpluggable='yes'/>  <!-- Workaround to use both L3 caches, check the Coreinfo -->
-    <vcpu id='5' enabled='no' hotpluggable='yes'/>
-    <vcpu id='6' enabled='no' hotpluggable='yes'/>
-    <vcpu id='7' enabled='no' hotpluggable='yes'/>
-    <vcpu id='8' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='9' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='10' enabled='yes' hotpluggable='yes'/>
-    <vcpu id='11' enabled='yes' hotpluggable='yes'/>
-  </vcpus>
-  <cputune>
-    <vcpupin vcpu='0' cpuset='1'/>
-    <vcpupin vcpu='1' cpuset='7'/>
-    <vcpupin vcpu='2' cpuset='2'/>
-    <vcpupin vcpu='3' cpuset='8'/>
-    <vcpupin vcpu='8' cpuset='4'/>    <!-- Notice that after vCPU3, we defined vCPU8. We disabled 4,5,6,7 vCPUs -->
-    <vcpupin vcpu='9' cpuset='10'/>
-    <vcpupin vcpu='10' cpuset='5'/>
-    <vcpupin vcpu='11' cpuset='11'/>
-    <emulatorpin cpuset='0,3,6,9'/>   <!-- Threads reserved for host machine (in my case Core#0 and Core#3) -->
-  </cputune>
-```
-
-```
-Enabling Hyper-V enlightenments (Windows only)
-
-  <hyperv>
-    <relaxed state='on'/>
-    <vapic state='on'/>
-    <spinlocks state='on' retries='8191'/>
-    <vpindex state='on'/>
-    <runtime state='on'/>
-    <synic state='on'/>
-    <stimer state='on'/>
-    <reset state='on'/>
-    <frequencies state='on'/>
-  </hyperv>
-```
-
-```
-  <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
-    <topology sockets='1' dies='1' cores='6' threads='2'/>    <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
-    <cache mode='passthrough'/>                     <!-- The real CPU cache data reported by the host CPU will be passed through to the virtual CPU -->
-    <feature policy='require' name='topoext'/>  
-    <feature policy='require' name='svm'/>
-    <feature policy='require' name='apic'/>         <!-- Enable various features improving behavior of guests running Microsoft Windows -->
-    <feature policy='require' name='hypervisor'/>
-    <feature policy='require' name='invtsc'/>
-  </cpu>                               
-```
-
-```
-  <clock offset="localtime">
-    <timer name="rtc" present="no" tickpolicy="catchup"/>
-    <timer name="pit" present="no" tickpolicy="delay"/>
-    <timer name="hpet" present="no"/>
-    <timer name="kvmclock" present="no"/>
-    <timer name="hypervclock" present="yes"/>
-    <timer name="tsc" present="yes" mode="native"/>
-  </clock>
-```	
-
-</details>
-
-## IOMMU, libvirt, QEMU and VBIOS configuration
-
-* Make sure IOMMU is enabled in the BIOS. For the ASRock motherboard (in my case) it is located in Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
+* Make sure IOMMU is enabled in the BIOS. For ASRock motherboards it should be in: Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
 * Append ```iommu=pt iommu=1``` [kernel parameters](https://wiki.archlinux.org/title/kernel_parameters). 
   If you are using the GRUB bootloader, change the /etc/default/grub: 
   ```
-  GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet amdgpu.ppfeaturemask=0xffffffff iommu=pt iommu=1"
+  GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet iommu=pt iommu=1"
   ```
 
 * Update the GRUB configuration and reboot:
@@ -141,8 +59,8 @@ Enabling Hyper-V enlightenments (Windows only)
     
 * Enable and start libvirt services:
   ```
-  systemctl enable --now libvirtd.service
-  systemctl start virtlogd.service
+  sudo systemctl enable --now libvirtd.service
+  sudo systemctl start virtlogd.service
   ```
 
 * Add a user to ```libvirt``` and ```kvm``` groups:
@@ -150,12 +68,12 @@ Enabling Hyper-V enlightenments (Windows only)
   sudo usermod -aG libvirt kvm yourusername
   ```
 
-* Check if you have the directory /dev/hugepages. If not, create it.
-
-* Mount hugepages in /etc/fstab and reboot:
-  ```
-  hugetlbfs       /dev/hugepages  hugetlbfs       mode=01770,gid=kvm        0 0
-  ```
+* If you want to use static hugepages:
+  * Check if you have the directory /dev/hugepages. If not, create it. 
+  * Mount the hugepages in /etc/fstab and reboot:
+    ```
+    hugetlbfs	/dev/hugepages	hugetlbfs	mode=01770,gid=kvm	0 0
+    ```
 
 * Don't forget to edit:
   * /etc/libvirt/libvirtd.conf
@@ -182,8 +100,7 @@ Enabling Hyper-V enlightenments (Windows only)
   
 * Restart the libvirt services after every modification:
   ```
-  systemctl restart libvirtd.service
-  systemctl restart virtlogd.service
+  sudo systemctl restart libvirtd.service virtlogd.service
   ```
 
 * Dump your vBIOS with [amdvbflash](https://github.com/stylesuxx/amdvbflash):
@@ -248,7 +165,133 @@ Enabling Hyper-V enlightenments (Windows only)
   <memballoon model="none"/>
   ```
 
-* Test the CPU pinning before the GPU passthrough. Edit your xml file, for details, [check out the 6-core CPUs topology and comments above](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough#ryzen-5-2600-cpu-topology-example). **For 8-core CPUs** check [this reddit post](https://www.reddit.com/r/VFIO/comments/erwzrg/comment/ftr99em/)! Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
+* Test the CPU pinning before the GPU passthrough. Edit your xml file, for details check out the 6-core CPUs topology and comments below. **For 8-core CPUs** check [this reddit post](https://www.reddit.com/r/VFIO/comments/erwzrg/comment/ftr99em/)! Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
+  * <details>
+      <summary>XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example</summary>
+	
+      ``` 
+                   L3                         L3
+	
+      |   Core#0 Core#1 Core#2  | |  Core#3 Core#4 Core#5   |
+      |    |0|     1      2     | |   |3|     4      5      |
+      |    |6|     7      8     | |   |9|     10     11     |
+      |      \                  | |     \                   |
+      |      Reserved for Host  | |      Reserved for Host  |
+      | __ __ __ __ __ __ __ __ | | __ __ __ __ __ __ __ __ |
+ 
+      <vcpu placement='static' current='8'>12</vcpu>  <!-- I will use only 8 cores, rest will be disabled in VM and used for the HOST machine (emulatorpin) -->
+      <vcpus>
+        <vcpu id='0' enabled='yes' hotpluggable='no'/>
+        <vcpu id='1' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='2' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='3' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='4' enabled='no' hotpluggable='yes'/>  <!-- Workaround to use both L3 caches, check the Coreinfo -->
+        <vcpu id='5' enabled='no' hotpluggable='yes'/>
+        <vcpu id='6' enabled='no' hotpluggable='yes'/>
+        <vcpu id='7' enabled='no' hotpluggable='yes'/>
+        <vcpu id='8' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='9' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='10' enabled='yes' hotpluggable='yes'/>
+        <vcpu id='11' enabled='yes' hotpluggable='yes'/>
+      </vcpus>
+      <cputune>
+        <vcpupin vcpu='0' cpuset='1'/>
+        <vcpupin vcpu='1' cpuset='7'/>
+        <vcpupin vcpu='2' cpuset='2'/>
+        <vcpupin vcpu='3' cpuset='8'/>
+        <vcpupin vcpu='8' cpuset='4'/>    <!-- Notice that after vCPU3, we defined vCPU8. We disabled 4,5,6,7 vCPUs -->
+        <vcpupin vcpu='9' cpuset='10'/>
+        <vcpupin vcpu='10' cpuset='5'/>
+        <vcpupin vcpu='11' cpuset='11'/>
+        <emulatorpin cpuset='0,3,6,9'/>   <!-- Threads reserved for host machine (in my case Core#0 and Core#3) -->
+      </cputune>
+      ```
+
+      ```
+      Enabling Hyper-V enlightenments (Windows only)
+
+      <hyperv mode='custom'>
+        <relaxed state='on'/>
+        <vapic state='on'/>
+        <spinlocks state='on' retries='8191'/>
+        <vpindex state='on'/>
+        <runtime state='on'/>
+        <synic state='on'/>
+        <stimer state='on'/>
+        <reset state='on'/>
+        <vendor_id state='on' value='ASRock'/>  <!-- The value doesn't matter -->
+        <frequencies state='on'/>
+        <reenlightenment state='off'/>   <!-- We use only one guest. Not fully supported on KVM, disable it. -->
+        <tlbflush state='on'/>
+        <ipi state='on'/>
+        <evmcs state='off'/> 		<!-- We do not use nested KVM in Hyper-v -->
+      </hyperv>
+      ```
+
+      ```
+      KVM features (add this below </hyperv> tag)
+
+      <kvm>
+        <hidden state='on'/>
+        <hint-dedicated state='on'/>
+      </kvm>
+      <vmport state='off'/>
+      <ioapic driver='kvm'/>
+      ```
+
+      ```
+      Passthrough mode and policy
+
+      <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
+        <topology sockets='1' dies='1' cores='6' threads='2'/>    <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
+        <cache mode='passthrough'/>                     <!-- The real CPU cache data reported by the host CPU will be passed through to the virtual CPU -->
+        <feature policy='require' name='topoext'/>  <!-- Required for the AMD CPUs -->
+        <feature policy='require' name='svm'/>
+        <feature policy='require' name='apic'/>         <!-- Enable various features improving behavior of guests running Microsoft Windows -->
+        <feature policy='require' name='hypervisor'/>
+        <feature policy='require' name='invtsc'/>
+      </cpu>                               
+      ```
+
+      ```
+      Timers
+
+      <clock offset="localtime">
+        <timer name="rtc" present="no" tickpolicy="catchup"/>
+        <timer name="pit" present="no" tickpolicy="delay"/>
+        <timer name="hpet" present="no"/>
+        <timer name="kvmclock" present="no"/>
+        <timer name="hypervclock" present="yes"/>
+        <timer name="tsc" present="yes" mode="native"/>
+      </clock>
+      ```
+
+      ```
+      Additional libvirt attributes
+
+      <devices>
+      ...
+        <memballoon model='none'/>    <!-- Disable memory ballooning -->
+        <panic model='hyperv'/>	<!-- Provides additional crash information when Windows crashes -->
+      </devices>
+     ```
+
+     ```
+     Additional QEMU agrs
+
+     You will have to modify virtual machine domain configuration to <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+
+     <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+     ...
+       </devices>
+       <qemu:commandline>
+         <qemu:arg value='-overcommit'/>
+         <qemu:arg value='cpu-pm=on'/>
+       </qemu:commandline>
+     </domain>  
+     ```
+
+</details>
 
 * Next, you will need to add and edit libvirt hook scripts 
  
@@ -267,7 +310,7 @@ Enabling Hyper-V enlightenments (Windows only)
 * Make sure the directory name in ```/etc/libvirt/hooks/qemu.d/``` matches the name of the virtual machine. Rename win10 if necessary.
   
 * You will need to **examine and edit** the scripts.
-  * You have to edit ```/etc/libvirt/hooks/cores.conf``` file. Edit each core variable, for systemd cpu pinning. The values ​​must match the values (vcpupin and emulatiorpin cores) ​​in the xml file. Also, edit masks.
+  * You have to edit ```/etc/libvirt/hooks/cores.conf``` file. Edit each core variable, for systemd cpu pinning. The values ​​must match the values (vcpupin and emulatiorpin cores) in the xml file. Also, edit masks.
   
   * You have to edit ```/etc/libvirt/hooks/kvm.conf``` file. Edit ```VIRSH_GPU_VIDEO``` and ```VIRSH_GPU_VIDEO``` variables. You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lspci -k``` command:
     ```
