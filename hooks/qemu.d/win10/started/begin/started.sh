@@ -7,10 +7,22 @@ set -x
 source "/etc/libvirt/hooks/cores.conf"
 echo "$(date)" libvirt-qemu: hook "$1" "$2" "$3" "$4" >> "$LOG"
 
+set_vcpus_nice_level() {
+    for grp in /sys/fs/cgroup/machine.slice/machine-qemu*"$VM_NAME".scope/libvirt/vcpu*
+    do
+        echo "libvirt-qemu nice: Setting $(basename "$grp")'s nice level to $TARGET_NICE" >> "$LOG"
+        cat < "$grp"/cgroup.threads | while IFS= read -r pid 
+        do
+            renice -n "$TARGET_NICE" -p "$pid" 2> /dev/null
+        done
+    done
+    echo "libvirt-qemu nice: Prioritized vCPU threads of VM '$VM_NAME'" >>"$LOG"
+}
+
 set_sched_policy() {
     if pid=$(pidof qemu-system-x86_64); then
-      chrt -f -p 1 "$pid"
-      echo "$(date)" libvirt-qemu: Changing scheduling to fifo for qemu pid "$pid" >> "$LOG"
+        chrt -f -p 1 "$pid"
+        echo "$(date)" libvirt-qemu: Changing scheduling to fifo for qemu pid "$pid" >> "$LOG"
     fi
 }
 
@@ -25,6 +37,7 @@ set_affinity() {
 }
 
 if [[ "$VM_ACTION" == "started/begin" ]]; then
+    set_vcpus_nice_level
     set_sched_policy
     set_affinity
 fi
