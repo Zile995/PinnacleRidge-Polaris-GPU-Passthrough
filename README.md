@@ -366,9 +366,34 @@
 
     </details>
 
-* Add USB Host devices, like keyboard, mouse... You can also follow [this tutorial](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)  
+* Add USB Host devices, like keyboard, mouse... You can also follow [this tutorial](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)
 
 * For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_JACK_and_PipeWire)
+  * In case you are using pipewire, you need to set the ```connectPorts``` pipewire-jack ports. To see the required jack ports, install the following package:
+     ```sudo pacman -S jack-example-tools```
+  * Then run the ```jack_lsp``` command and find the appropriate ports.
+  * Add one HDA ```ich9``` sound model with one ```jack``` device and set ```connectPorts```, as it can be seen in the xml example, below:  
+    * ```
+      <sound model='ich9'>
+        <codec type='micro'/>
+        <audio id='1'/>
+        <address type='pci' domain='0x0000' bus='0x00' slot='0x1b' function='0x0'/>
+      </sound>
+      <audio id='1' type='jack'>
+        <input clientName='win10' connectPorts='Family 17h.*capture_F[LR]'/>       <!-- The client name is usually set as the vm name -->
+        <output clientName='win10' connectPorts='Family 17h.*playback_F[LR]'/>
+      </audio>
+      ```
+  * Then add the following QEMU arguments, ```PIPEWIRE_RUNTIME_DIR``` and ```PIPEWIRE_LATENCY```:
+    ```
+    ...
+      </devices>
+      <qemu:commandline>
+        <qemu:env name='PIPEWIRE_RUNTIME_DIR' value='/run/user/1000'/>  <!-- Use the id command to find the correct ID -->
+        <qemu:env name='PIPEWIRE_LATENCY' value='512/48000'/>  <!-- Set desired latency > 
+      </qemu:commandline>
+    </domain>
+    ```
 
 * Set the network source to ```Bridge device``` with ```virbr0``` device name and ```virtio``` device model.
   * <details>
@@ -377,7 +402,7 @@
 	
       ![Screenshot from 2022-05-23 15-58-43](https://user-images.githubusercontent.com/32335484/169836330-874c4f3a-06dd-4fb9-81fd-ba3c89ec0359.png)
 	
-    </details>  
+    </details> 
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
   ```
