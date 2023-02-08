@@ -231,7 +231,7 @@
       </hyperv>
       ```
 
-      ### KVM features (add this below </hyperv> tag)
+      ### KVM features
       ```XML
       <kvm>
         <hidden state='on'/>
@@ -277,7 +277,7 @@
       </devices>
      ```
 
-     ### Additional QEMU agrs,
+     ### Additional QEMU agrs
      ```XML
      <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'> <!-- Modify virtual machine domain configuration! -->
      ...
