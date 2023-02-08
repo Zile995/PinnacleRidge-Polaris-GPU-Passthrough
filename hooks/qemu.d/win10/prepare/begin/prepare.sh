@@ -9,9 +9,9 @@ source "/etc/libvirt/hooks/cores.conf"
 echo "$(date)" libvirt-qemu: hook "$1" "$2" "$3" "$4" >> "$LOG"
 
 stop_systemd_services() {
-    # Stop display manager, fan control service
+    # Stop display manager, fan control service, ...
+    # systemctl stop amdgpu-fancontrol.service
     systemctl stop gdm.service
-    systemctl stop amdgpu-fancontrol.service
     echo "$(date)" libvirt-qemu: Successfully stopped systemd services >> "$LOG"
 }
 

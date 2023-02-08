@@ -29,6 +29,12 @@ set_ondemand_governor() {
     echo "$(date)" libvirt-qemu: Successfully set ondemand CPU governor for host machine >> "$LOG"
 }
 
+set_schedutil_governor() {
+    # Switch to schedutil CPU governor
+    for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "schedutil" > "$file"; done
+    echo "$(date)" libvirt-qemu: Successfully set schedutil CPU governor for host machine >> "$LOG"
+}
+
 remove_vfio_modules() {
     # Remove VFIO kernel modules
     modprobe -r vfio-pci
@@ -45,8 +51,8 @@ load_amd_gpu() {
 }
 
 restart_systemd_services() {
-    # Stop display manager, fan control service
-    systemctl restart amdgpu-fancontrol.service
+    # Restart display manager, fan control service, ...
+    # systemctl restart amdgpu-fancontrol.service
     systemctl restart gdm.service
     echo "$(date)" libvirt-qemu: Successfully restarted systemd services >> "$LOG"
 }
