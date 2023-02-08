@@ -34,50 +34,50 @@
 * Make sure IOMMU is enabled in the BIOS. For ASRock motherboards it should be in: Advanced > AMD CBS > NBIO Common Options > NB Configuration > IOMMU
 
 * Append ```iommu=pt iommu=1``` [kernel parameters](https://wiki.archlinux.org/title/kernel_parameters). 
-  If you are using the GRUB bootloader, change the /etc/default/grub: 
-  ```
+  If you are using the GRUB bootloader, change the ```/etc/default/grub```: 
+  ```Shell
   GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet iommu=pt iommu=1"
   ```
 
 * Update the GRUB configuration and reboot:
-  ```
+  ```Shell
   sudo grub-mkconfig -o /boot/grub/grub.cfg 
   ```
 
 * Install the necessary Arch Linux packages:
-  ```
+  ```Shell
   sudo pacman -S qemu-desktop edk2-ovmf libvirt iptables-nft dnsmasq bridge-utils dmidecode virt-manager
   ```
   * For remote management over SSH, install this package:
-    ```
+    ```Shell
     sudo pacman -S openbsd-netcat
     ```  
   * For Windows 11 installation, you will need a TPM emulator, install this package:
-    ```
+    ```Shell
     sudo pacman -S swtpm
     ```
     
 * Enable and start libvirt services:
-  ```
+  ```Shell
   sudo systemctl enable --now libvirtd.service
   sudo systemctl start virtlogd.service
   ```
 
 * Add a user to ```libvirt``` and ```kvm``` groups:
-  ```
+  ```Shell
   sudo usermod -aG libvirt kvm yourusername
   ```
 
 * If you want to use static hugepages:
   * Check if you have the directory /dev/hugepages. If not, create it. 
   * Mount the hugepages in /etc/fstab and reboot:
-    ```
+    ```Shell
     hugetlbfs	/dev/hugepages	hugetlbfs	mode=01770,gid=kvm	0 0
     ```
 
 * Don't forget to edit:
   * /etc/libvirt/libvirtd.conf
-    ```
+    ```Shell
     unix_sock_group = "libvirt"
     unix_sock_ro_perms = "0777"
     unix_sock_rw_perms = "0770"
@@ -87,19 +87,19 @@
     log_outputs = "1:file:/var/log/libvirt/libvirtd.log"
     ```
   * /etc/libvirt/qemu.conf
-    ```
+    ```Shell
     user = "yourusername"
     group = "kvm"
     ```
     
 * You might need to start the default network manually:
-  ```
+  ```Shell
   sudo virsh net-start default
   sudo virsh net-autostart default
   ```
   
 * Restart the libvirt services after every modification:
-  ```
+  ```Shell
   sudo systemctl restart libvirtd.service virtlogd.service
   ```
 
@@ -108,7 +108,7 @@
   * vBIOS will be created in home directory
   * Move your GPU vBIOS file to ```/var/lib/libvirt/vbios``` directory. If you don't have this directory, create it. 
   * Set the correct permissions and ownership for your vBIOS file:
-    ```
+    ```Shell
     sudo chmod -R 775 /var/lib/libvirt/vbios/yourvbiosname.rom
     sudo chown yourusername:yourusername /var/lib/libvirt/vbios/yourvbiosname.rom
     ```
@@ -130,7 +130,7 @@
     </details>
     
 * For Win11 installation, add a TPM emulator in your xml file:
-  ```
+  ```XML
   <tpm model="tpm-tis">
     <backend type="emulator" version="2.0"/>
   </tpm>
@@ -161,15 +161,19 @@
     </details>
 
 * Disable memballoon in your xml file:
-  ```
-  <memballoon model="none"/>
+  ```XML
+  <devices>
+    ...
+    <memballoon model='none'/>
+  </devices>
   ```
 
 * Test the CPU pinning before the GPU passthrough. Edit your xml file, for details check out the 6-core CPUs topology and comments below. **For 8-core CPUs** check [this reddit post](https://www.reddit.com/r/VFIO/comments/erwzrg/comment/ftr99em/)! Also check the [win10.xml](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/blob/main/win10.xml) example file
   * <details>
       <summary>XML Config, Ryzen 2600 2 x 3-core CCX CPU Pinning example</summary>
-	
-      ``` 
+
+      ### CPU Pinning
+      ```XML 
                    L3                         L3
 	
       |   Core#0 Core#1 Core#2  | |  Core#3 Core#4 Core#5   |
@@ -207,9 +211,8 @@
       </cputune>
       ```
 
-      ```
-      Enabling Hyper-V enlightenments (Windows only)
-
+      ### Enabling Hyper-V enlightenments (Windows only)
+      ```XML
       <hyperv mode='custom'>
         <relaxed state='on'/>
         <vapic state='on'/>
@@ -228,9 +231,8 @@
       </hyperv>
       ```
 
-      ```
-      KVM features (add this below </hyperv> tag)
-
+      ### KVM features (add this below </hyperv> tag)
+      ```XML
       <kvm>
         <hidden state='on'/>
         <hint-dedicated state='on'/>
@@ -238,9 +240,9 @@
       <vmport state='off'/>
       <ioapic driver='kvm'/>
       ```
-
-      ```
-      Passthrough mode and policy
+      
+      ### Passthrough mode and policy
+      ```XML
 
       <cpu mode='host-passthrough' check='none' migratable='on'>  <!-- Set the cpu mode to passthrough -->
         <topology sockets='1' dies='1' cores='6' threads='2'/>    <!-- Match the cpu topology. In my case 6c/12t, or 2 threads per each core -->
@@ -253,9 +255,9 @@
       </cpu>                               
       ```
 
-      ```
-      Timers
-
+      ### Timers
+      ```XML
+     
       <clock offset="localtime">
         <timer name="rtc" present="no" tickpolicy="catchup"/>
         <timer name="pit" present="no" tickpolicy="delay"/>
@@ -266,9 +268,8 @@
       </clock>
       ```
 
-      ```
-      Additional libvirt attributes
-
+      ### Additional libvirt attributes
+      ```XML
       <devices>
       ...
         <memballoon model='none'/>    <!-- Disable memory ballooning -->
@@ -276,12 +277,9 @@
       </devices>
      ```
 
-     ```
-     Additional QEMU agrs
-
-     You will have to modify virtual machine domain configuration to <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-
-     <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+     ### Additional QEMU agrs,
+     ```XML
+     <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'> <!-- Modify virtual machine domain configuration! -->
      ...
        </devices>
        <qemu:commandline>
@@ -313,7 +311,7 @@
   * You have to edit ```/etc/libvirt/hooks/cores.conf``` file. Edit each core variable, for systemd cpu pinning. The values ​​must match the values (vcpupin and emulatiorpin cores) in the xml file. Also, edit masks.
   
   * You have to edit ```/etc/libvirt/hooks/kvm.conf``` file. Edit ```VIRSH_GPU_VIDEO``` and ```VIRSH_GPU_VIDEO``` variables. You can find VGA GPU and GPU HDMI Audio PCI IDs with ```lspci -k``` command:
-    ```
+    ```Shell
     0a:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
 	  Subsystem: Sapphire Technology Limited Nitro+ Radeon RX 570/580/590
 	  Kernel driver in use: amdgpu    <- We need to unload this driver
@@ -325,19 +323,29 @@
 	  Kernel modules: snd_hda_intel
     ```
   * In my case, final IDs for ```0a:00.0``` and ```0a:00.1``` devices will be: 
-    ```
+    ```Shell
     * Final IDs
     * VIRSH_GPU_VIDEO:   0000:0a:00.0
     * VIRSH_GPU_VIDEO:   0000:0a:00.1
     ```
 
-* The release script [release.sh](https://github.com/Zile995/PinnacleRidge-Polaris-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/release.sh) will set the ondemand governor. Change ```set_ondemand_governor()``` function in ```release.sh``` to schedutil if necessary.
+* The release script [release.sh](https://github.com/Zile995/PinnacleRidge-Polaris-GPU-Passthrough/blob/main/hooks/qemu.d/win10/release/end/release.sh) will set the ondemand governor. Change to schedutil governor by using the ```set_schedutil_governor``` function instead of the ```set_ondemand_governor``` function:
+  * ```Shell
+    if [[ "$VM_ACTION" == "release/end" ]]; then
+        release_cores
+        # set_ondemand_governor
+        set_schedutil_governor
+        remove_vfio_modules
+        load_amd_gpu
+        restart_systemd_services
+    fi
+    ```
     
 ## Passthrough (virt-manager)
 * You can follow [this virt-manager tutorial](https://github.com/bryansteiner/gpu-passthrough-tutorial#part3)
 
-* Open the virt-manager and add GPU PCI Host devices, both GPU and HDMI Audio devices. Remove DisplaySpice, VideoQXL and other serial devices only from XML file.
-  * ```
+* Open the virt-manager and add the GPU PCI devices, both GPU and HDMI Audio devices. Remove DisplaySpice, VideoQXL and other serial devices from the XML file:
+  * ```XML
     <!-- Remove Display Spice -->
     <graphics type="spice" port="-1" tlsPort="-1" autoport="yes">
       <image compression="off"/>
@@ -360,7 +368,7 @@
     ```
   * <details>
 	
-      <summary>Adding GPU PCI Host devices</summary>
+      <summary>Adding the GPU PCI devices</summary>
   
       ![Screenshot from 2022-05-23 15-48-07](https://user-images.githubusercontent.com/32335484/169833957-2c48ff46-bd9c-40a7-95c1-2c3bc72bc72a.png)
 
@@ -368,12 +376,12 @@
 
 * Add USB Host devices, like keyboard, mouse... You can also follow [this tutorial](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF#Passing_keyboard/mouse_via_Evdev)
 
-* For sound: You can passthrough the PCI HD Audio controler or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_JACK_and_PipeWire)
+* For sound: You can passthrough the PCI HD Audio controller or you can use [qemu pusleaudio passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_PulseAudio) or [qemu pipewire passthrough](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Passing_audio_from_virtual_machine_to_host_via_JACK_and_PipeWire)
   * In case you are using pipewire, you need to set the ```connectPorts``` pipewire-jack ports. To see the required jack ports, install the following package:
      ```sudo pacman -S jack-example-tools```
   * Then run the ```jack_lsp``` command and find the appropriate ports.
-  * Add one HDA ```ich9``` sound model with one ```jack``` device and set ```connectPorts```, as it can be seen in the xml example, below:  
-    * ```
+  * Add one ```ich9``` sound device with one ```jack``` audio device and set ```connectPorts```, as it can be seen in the xml example, below:  
+    * ```XML
       <sound model='ich9'>
         <codec type='micro'/>
         <audio id='1'/>
@@ -385,15 +393,17 @@
       </audio>
       ```
   * Then add the following QEMU arguments, ```PIPEWIRE_RUNTIME_DIR``` and ```PIPEWIRE_LATENCY```:
-    ```
-    ...
-      </devices>
-      <qemu:commandline>
-        <qemu:env name='PIPEWIRE_RUNTIME_DIR' value='/run/user/1000'/>  <!-- Use the id command to find the correct ID -->
-        <qemu:env name='PIPEWIRE_LATENCY' value='512/48000'/>  <!-- Set desired latency > 
-      </qemu:commandline>
-    </domain>
-    ```
+    * ```XML
+      <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+        <devices>    
+        ...
+        </devices>
+        <qemu:commandline>
+          <qemu:env name='PIPEWIRE_RUNTIME_DIR' value='/run/user/1000'/>  <!-- Use the id command to find the correct ID -->
+          <qemu:env name='PIPEWIRE_LATENCY' value='512/48000'/>  <!-- Set desired latency --> 
+        </qemu:commandline>
+      </domain>
+      ```
 
 * Set the network source to ```Bridge device``` with ```virbr0``` device name and ```virtio``` device model.
   * <details>
@@ -405,7 +415,7 @@
     </details> 
 
 * Don't forget to add vbios.rom file inside the win10.xml for the GPU and HDMI host PCI devices, example:
-  ```
+  ```XML
     ...
     </source>
     <rom file='/var/lib/libvirt/vbios/yourvbiosname.rom'/>  <!-- Place here -->
