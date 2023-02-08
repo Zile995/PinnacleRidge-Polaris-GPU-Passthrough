@@ -92,10 +92,10 @@
     group = "kvm"
     ```
     
-* You might need to start default network manually:
+* You might need to start the default network manually:
   ```
-  virsh net-start default
-  virsh net-autostart default
+  sudo virsh net-start default
+  sudo virsh net-autostart default
   ```
   
 * Restart the libvirt services after every modification:
