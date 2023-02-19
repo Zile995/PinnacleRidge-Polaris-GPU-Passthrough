@@ -5,10 +5,10 @@ set -x
 
 # Load config files
 source "/etc/libvirt/hooks/cores.conf"
-echo "$(date)" libvirt-qemu: hook "$1" "$2" "$3" "$4" >> "$LOG"
+printer "hook $1 $2 $3 $4"
 
 release_cores() {
-    echo "$(date)" libvirt-qemu: Releasing CPUs "$VIRT_CORES" from VM "$VM_NAME" >> "$LOG"
+    printer "Releasing CPUs $VIRT_CORES from VM $VM_NAME"
     systemctl set-property --runtime -- user.slice AllowedCPUs="$TOTAL_CORES"
     systemctl set-property --runtime -- system.slice AllowedCPUs="$TOTAL_CORES"
     systemctl set-property --runtime -- init.scope AllowedCPUs="$TOTAL_CORES"
@@ -17,7 +17,7 @@ release_cores() {
     # Revert changes made to the writeback workqueue
     echo "$TOTAL_CORES_MASK" > /sys/bus/workqueue/devices/writeback/cpumask
     echo "1" > /sys/bus/workqueue/devices/writeback/numa
-    echo "$(date)" libvirt-qemu: Successfully released CPUs "$VIRT_CORES" >> "$LOG"
+    printer "Successfully released CPUs $VIRT_CORES"
 }
 
 set_ondemand_governor() {
@@ -26,13 +26,13 @@ set_ondemand_governor() {
     echo -n "1" > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
     echo -n "50" > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
     echo -n "10" > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
-    echo "$(date)" libvirt-qemu: Successfully set ondemand CPU governor for host machine >> "$LOG"
+    printer "Successfully set ondemand CPU governor for host machine"
 }
 
 set_schedutil_governor() {
     # Switch to schedutil CPU governor
     for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "schedutil" > "$file"; done
-    echo "$(date)" libvirt-qemu: Successfully set schedutil CPU governor for host machine >> "$LOG"
+    printer "Successfully set schedutil CPU governor for host machine"
 }
 
 remove_vfio_modules() {
@@ -40,21 +40,21 @@ remove_vfio_modules() {
     modprobe -r vfio-pci
     modprobe -r vfio_virqfd
     modprobe -r vfio_iommu_type1
-    echo "$(date)" libvirt-qemu: Successfully unloaded VFIO-PCI >> "$LOG"
+    printer "Successfully unloaded VFIO-PCI"
 }
 
 load_amd_gpu() {
     # Load AMD GPU driver
     modprobe amdgpu
     echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
-    echo "$(date)" libvirt-qemu: Successfully loaded AMD GPU >> "$LOG"
+    printer "Successfully loaded AMD GPU"
 }
 
 restart_systemd_services() {
     # Restart display manager, fan control service, ...
     # systemctl restart amdgpu-fancontrol.service
     systemctl restart gdm.service
-    echo "$(date)" libvirt-qemu: Successfully restarted systemd services >> "$LOG"
+    printer "Successfully restarted systemd services"
 }
 
 if [[ "$VM_ACTION" == "release/end" ]]; then

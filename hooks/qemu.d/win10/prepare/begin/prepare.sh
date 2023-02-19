@@ -6,13 +6,13 @@ set -x
 # Load config files
 source "/etc/libvirt/hooks/kvm.conf"
 source "/etc/libvirt/hooks/cores.conf"
-echo "$(date)" libvirt-qemu: hook "$1" "$2" "$3" "$4" >> "$LOG"
+printer "hook $1 $2 $3 $4"
 
 stop_systemd_services() {
     # Stop display manager, fan control service, ...
     # systemctl stop amdgpu-fancontrol.service
     systemctl stop gdm.service
-    echo "$(date)" libvirt-qemu: Successfully stopped systemd services >> "$LOG"
+    printer "Successfully stopped systemd services"
 }
 
 unload_amd_gpu() {
@@ -22,11 +22,11 @@ unload_amd_gpu() {
 
     # Remove AMD GPU kernel modules
     modprobe -r amdgpu
-    echo "$(date)" libvirt-qemu: Successfully unloaded AMD GPU >> "$LOG"
+    printer "Successfully unloaded AMD GPU"
 }
 
 set_host_cores() {
-    echo "$(date)" libvirt-qemu: Reserving CPUs "$HOST_CORES" for host machine >> "$LOG"
+    printer "Reserving CPUs $HOST_CORES for host machine"
     systemctl set-property --runtime -- user.slice AllowedCPUs="$HOST_CORES"
     systemctl set-property --runtime -- system.slice AllowedCPUs="$HOST_CORES"
     systemctl set-property --runtime -- init.scope AllowedCPUs="$HOST_CORES"
@@ -34,13 +34,13 @@ set_host_cores() {
     # Restrict the workqueue to use only cpu 0.
     echo "$HOST_CORES_MASK" > /sys/bus/workqueue/devices/writeback/cpumask
     echo "0" > /sys/bus/workqueue/devices/writeback/numa
-    echo "$(date)" libvirt-qemu: Successfully reserved CPUs "$HOST_CORES" for host machine >> "$LOG"
+    printer "Successfully reserved CPUs $HOST_CORES for host machine"
 }
 
 set_performance_governor() {
     # Enable CPU governor performance mode
     for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "performance" > "$file"; done
-    echo "$(date)" libvirt-qemu: Successfully set performance CPU governor for VM "$VM_NAME" >> "$LOG"
+    printer "Successfully set performance CPU governor for VM $VM_NAME"
 }
 
 defragment_memory_and_drop_caches() {
@@ -55,7 +55,7 @@ defragment_memory_and_drop_caches() {
 
     # Tell the kernel to "defragment" memory where possible.
     echo "1" > /proc/sys/vm/compact_memory
-    echo "$(date)" libvirt-qemu: Successfully defragmented memory >> "$LOG"
+    printer "Successfully defragmented memory"
 }
 
 if [[ "$VM_ACTION" == "prepare/begin" ]]; then

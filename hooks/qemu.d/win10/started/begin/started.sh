@@ -5,31 +5,31 @@ set -x
 
 # Load config files
 source "/etc/libvirt/hooks/cores.conf"
-echo "$(date)" libvirt-qemu: hook "$1" "$2" "$3" "$4" >> "$LOG"
+printer "hook $1 $2 $3 $4"
 
 set_vcpus_nice_level() {
     for grp in /sys/fs/cgroup/machine.slice/machine-qemu*"$VM_NAME".scope/libvirt/vcpu*
     do
-        echo "libvirt-qemu nice: Setting $(basename "$grp")'s nice level to $TARGET_NICE" >> "$LOG"
+        printer "Setting $(basename "$grp")'s nice level to $TARGET_NICE"
         cat < "$grp"/cgroup.threads | while IFS= read -r pid 
         do
             renice -n "$TARGET_NICE" -p "$pid" 2> /dev/null
         done
     done
-    echo "libvirt-qemu nice: Prioritized vCPU threads of VM '$VM_NAME'" >>"$LOG"
+    printer "Prioritized vCPU threads of VM $VM_NAME"
 }
 
 set_sched_policy() {
     if pid=$(pidof qemu-system-x86_64); then
         chrt -f -p 1 "$pid"
-        echo "$(date)" libvirt-qemu: Changing scheduling to fifo for qemu pid "$pid" >> "$LOG"
+        printer "Changing scheduling to fifo for qemu pid $pid"
     fi
 }
 
 set_affinity() {
     sleep 30
     grep vfio /proc/interrupts | cut -d ":" -f 1 | while read -r i; do
-        echo "$(date)" libvirt-qemu: Changing smp_affinity for vfio irq "$i" >> "$LOG"
+        printer "Changing smp_affinity for vfio irq $i"
         if [[ $VIRT_CORES -ne $(cat /proc/irq/"$i"/smp_affinity_list) ]]; then 
             echo "$VIRT_CORES" > /proc/irq/"$i"/smp_affinity_list
         fi
