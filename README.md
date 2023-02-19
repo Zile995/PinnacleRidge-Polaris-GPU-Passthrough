@@ -425,8 +425,8 @@
 
 ## Logging
 
-* Check all hook logs with ```sudo cat /dev/kmsg | grep libvirt-qemu```
+* Check hook logs with `journalctl | grep 'libvirt-qemu'`
 
-* Check all libvirt logs in ```/var/log/libvirt/libvirtd.log``` file
+* Check libvirt logs in `/var/log/libvirt/libvirtd.log` file
 
-* Check all qemu logs in ```/var/log/libvirt/qemu/``` directory 
+* Check qemu logs in `/var/log/libvirt/qemu/` directory 
