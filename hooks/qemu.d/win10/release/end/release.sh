@@ -25,7 +25,7 @@ set_ondemand_governor() {
     for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "ondemand" > "$file"; done
     echo -n "1" > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
     echo -n "50" > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
-    echo -n "10" > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
+    echo -n "20" > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
     printer "Successfully set ondemand CPU governor for host machine"
 }
 
