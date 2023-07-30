@@ -31,14 +31,14 @@
 
 <details>
   <summary>System topology (lstopo)</summary>
-  
-  ![Screenshot_20210417_121900](https://user-images.githubusercontent.com/32335484/115109624-32f87380-9f77-11eb-8081-7054ef6a1eff.png)          
+
+  ![Screenshot_20210417_121900](https://user-images.githubusercontent.com/32335484/115109624-32f87380-9f77-11eb-8081-7054ef6a1eff.png)
 
 </details>
 
 <details>
   <summary>Coreinfo L3 cache</summary>
-  
+
   ![Coreinfo](https://user-images.githubusercontent.com/32335484/150604836-d8f342f6-f35b-4aaa-b759-d4e83cb3ddc6.png)
 
 </details>
@@ -72,7 +72,7 @@
     ```Shell
     sudo pacman -S swtpm
     ```
-    
+ 
 * Enable and start libvirt services:
   ```Shell
   sudo systemctl enable --now libvirtd.service
@@ -107,13 +107,13 @@
     user = "yourusername"
     group = "kvm"
     ```
-    
+ 
 * You might need to start the default network manually:
   ```Shell
   sudo virsh net-start default
   sudo virsh net-autostart default
   ```
-  
+
 * Restart the libvirt services after every modification:
   ```Shell
   sudo systemctl restart libvirtd.service virtlogd.service
@@ -143,11 +143,11 @@
   * <details>
 	
       <summary>virt-manager virtio-win.iso mounting</summary>
-  
+
       ![virtio-win.iso mounting](https://user-images.githubusercontent.com/32335484/169831867-c173ccae-de54-4bf4-bf7e-e1a29f855f33.png)
 
     </details>
-    
+
 * For Win11 installation, add a TPM emulator in your xml file:
   ```XML
   <tpm model="tpm-tis">
@@ -159,7 +159,7 @@
   * <details>
 	
       <summary>Virtio storage driver loading procedure</summary>
-  
+
       ![Load driver](https://user-images.githubusercontent.com/32335484/169829750-a95c0d90-78ed-4b86-ad86-9d6f71557cf7.png)
 	
       ![Select folder](https://user-images.githubusercontent.com/32335484/169829787-58e1fa9e-994d-4b45-8726-9e28ce684049.png)
@@ -172,7 +172,7 @@
     * <details>
 	
         <summary>Virtio Windows drivers</summary>
-  
+
         ![Virtio win drivers 1](https://user-images.githubusercontent.com/32335484/169830239-0d79a8d8-3f13-42d1-bdb8-c3ba5429536b.png)
 
         ![Virtio win drivers 2](https://user-images.githubusercontent.com/32335484/169830274-40d7e230-7183-4301-91df-6d8e8d5d227d.png)
@@ -264,7 +264,7 @@
       <vmport state='off'/>
       <ioapic driver='kvm'/>
       ```
-      
+
       ### Passthrough mode and policy
       ```XML
 
@@ -327,12 +327,12 @@
   ![tree](https://user-images.githubusercontent.com/32335484/219906789-a7ab85a8-2c0a-4e23-a806-6d4c89c6b860.png)
 
   </details>
-  
+
 * Move [hooks](https://github.com/Zile995/Ryzen-2600_RX-580-GPU-Passthrough/tree/main/hooks) directory from this repository to `/etc/libvirt/`
     * `sudo cp -r hooks /etc/libvirt/`
 
 * Make sure the directory name in `/etc/libvirt/hooks/qemu.d/` matches the name of the virtual machine. Rename win10 if necessary.
-  
+
 * You will need to **examine and edit** the scripts.
   * You have to edit `/etc/libvirt/hooks/cores.conf` file. Edit each core variable used for systemd cpu pinning. The values **must** match the values (`vcpupin` and `emulatiorpin` cores) in the xml file. Emulator pin cores represent host machine cores, while vcpupin cores represents virtual machine cores. The variable names are self-explanatory. Also, edit masks:
     ```Shell
@@ -342,7 +342,7 @@
     HOST_CORES_MASK=924                # 0,3,6,9 bitmask 0b100100100100
     VIRT_CORES='1-2,4-5,7-8,10-11'     # Cores reserved for virtual machine(s)
     ```
-  
+
   * You have to edit `/etc/libvirt/hooks/kvm.conf` file. Edit `VIRSH_GPU_VIDEO` and `VIRSH_GPU_VIDEO` variables. You can find VGA GPU and GPU HDMI Audio PCI IDs using the `lspci -k` command:
     ```Shell
     0a:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590] (rev e7)
@@ -400,7 +400,7 @@
   * <details>
 	
       <summary>Adding the GPU PCI devices</summary>
-  
+
       ![GPU PCI devices](https://user-images.githubusercontent.com/32335484/169833957-2c48ff46-bd9c-40a7-95c1-2c3bc72bc72a.png)
 
     </details>
@@ -434,7 +434,7 @@
      `sudo pacman -S jack-example-tools`
   * Then run the `jack_lsp` command and find the appropriate ports.
   * Add one `ich9` sound device with one `jack` audio device and set `connectPorts`, as it can be seen in the xml example, below:
-  
+
     ```XML
     <sound model='ich9'>
       <codec type='micro'/>
@@ -446,8 +446,8 @@
       <output clientName='win10' connectPorts='Family 17h.*playback_F[LR]'/>
     </audio>
     ```
-  * Then add the following QEMU arguments, `PIPEWIRE_RUNTIME_DIR` and `PIPEWIRE_LATENCY`:
-  
+  * Then modify the virtual machine domain configuration (`<domain ... >` line) and add the following QEMU arguments, `PIPEWIRE_RUNTIME_DIR` and `PIPEWIRE_LATENCY`:
+
     ```XML
     <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
       <devices>    
