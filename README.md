@@ -459,6 +459,7 @@
       </qemu:commandline>
     </domain>
     ```
+  * If you cannot save changes in the virt-manager XML editor, edit with the following command: `sudo virsh edit win10`. Replace `win10` with your VM name. This command expects the `vi` editor. If you don't have it installed, you can run the command with different `EDITOR` like this: `sudo EDITOR=nano virsh edit vmname`
 
 * Set the network source to `Bridge device` with `virbr0` device name and `virtio` device model.
   * <details>
